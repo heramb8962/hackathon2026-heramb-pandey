@@ -1,0 +1,4 @@
+__pycache__/
+.env
+*.log
+audit_log.json

@@ -1,0 +1,20 @@
+[
+  {
+    "ticket_id": 1,
+    "message": "I want a refund, product was damaged",
+    "order_id": "ORD123",
+    "email": "user1@example.com"
+  },
+  {
+    "ticket_id": 2,
+    "message": "Where is my order?",
+    "order_id": "ORD124",
+    "email": "user2@example.com"
+  },
+  {
+    "ticket_id": 3,
+    "message": "I received wrong item, need replacement",
+    "order_id": "ORD125",
+    "email": "user3@example.com"
+  }
+]
