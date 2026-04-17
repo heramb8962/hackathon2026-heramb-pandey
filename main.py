@@ -1,13 +1,12 @@
-from tools.order import get_order
-from tools.refund import check_refund_eligibility, issue_refund
-from utils.retry import retry
+import json
+from agent.agent import process_ticket
 
-order = retry(lambda: get_order("ORD123"))
+def main():
+    with open("data/tickets.json") as f:
+        tickets = json.load(f)
 
-eligibility = retry(lambda: check_refund_eligibility(order))
+    for ticket in tickets:
+        process_ticket(ticket)
 
-if eligibility["eligible"]:
-    refund = retry(lambda: issue_refund("ORD123", order["amount"]))
-    print("Refund:", refund)
-else:
-    print("Not eligible:", eligibility)
+if __name__ == "__main__":
+    main()
