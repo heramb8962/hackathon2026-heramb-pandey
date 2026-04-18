@@ -1,12 +1,21 @@
 import json
+import asyncio
 from agent.agent import process_ticket
 
-def main():
+async def run_ticket(ticket):
+    return process_ticket(ticket)
+
+async def main():
     with open("data/tickets.json") as f:
         tickets = json.load(f)
 
-    for ticket in tickets:
-        process_ticket(ticket)
+    tasks = [run_ticket(ticket) for ticket in tickets]
+
+    results = await asyncio.gather(*tasks)
+
+    print("\nFINAL RESULTS:")
+    for res in results:
+        print(res)
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
