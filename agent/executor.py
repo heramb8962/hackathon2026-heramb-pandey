@@ -6,47 +6,67 @@ from utils.logger import log
 def execute(plan, ticket):
     print(f"[EXECUTOR] Executing plan: {plan}")
 
-    results = {}
+    results = {"steps_executed": []}
 
     for step in plan:
         try:
-            # 🔹 Fetch order
-            if step == "get_order":
-                results["order"] = retry(lambda: get_order(ticket["order_id"]))
-                log(ticket["ticket_id"], "get_order", results["order"])
+            results["steps_executed"].append(step)
 
-            # 🔹 Check refund eligibility
+            # 🔹 GET ORDER
+            if step == "get_order":
+                result = retry(lambda: get_order(ticket["order_id"]))
+
+                if "error" in result:
+                    results["error"] = result["error"]
+                    break
+
+                results["order"] = result
+                log(ticket["ticket_id"], "get_order", result)
+
+            # 🔹 CHECK REFUND
             elif step == "check_refund":
                 if "order" not in results:
-                    raise Exception("Order data missing before refund check")
+                    results["error"] = "Order missing"
+                    break
 
-                results["eligibility"] = retry(
-                    lambda: check_refund_eligibility(results["order"])
-                )
-                log(ticket["ticket_id"], "check_refund", results["eligibility"])
+                result = retry(lambda: check_refund_eligibility(results["order"]))
 
-            # 🔹 Issue refund
+                if "error" in result:
+                    results["error"] = result["error"]
+                    break
+
+                results["eligibility"] = result
+                log(ticket["ticket_id"], "check_refund", result)
+
+            # 🔹 ISSUE REFUND
             elif step == "issue_refund":
                 if not results.get("eligibility", {}).get("eligible", False):
-                    print("[EXECUTOR] Refund not eligible, skipping...")
                     continue
 
-                results["refund"] = retry(
+                result = retry(
                     lambda: issue_refund(
                         ticket["order_id"],
                         results["order"]["amount"]
                     )
                 )
-                log(ticket["ticket_id"], "issue_refund", results["refund"])
 
-            # 🔹 Send reply (SMART RESPONSE)
+                if "error" in result:
+                    results["error"] = result["error"]
+                    break
+
+                results["refund"] = result
+                log(ticket["ticket_id"], "issue_refund", result)
+
+            # 🔹 SEND REPLY
             elif step == "send_reply":
-                if "refund" in results:
-                    reply = "✅ Your refund has been successfully processed."
+                if "error" in results:
+                    reply = "⚠️ Unable to process automatically. Escalated to human agent."
+                elif "refund" in results:
+                    reply = "✅ Refund processed successfully."
                 elif "eligibility" in results and not results["eligibility"]["eligible"]:
-                    reply = "⚠️ Your request is not eligible for refund. Escalating to support."
+                    reply = "⚠️ Not eligible for refund. Escalating."
                 else:
-                    reply = "📦 Your request has been processed. Please check your order details."
+                    reply = "📦 Request processed successfully."
 
                 results["reply"] = reply
                 log(ticket["ticket_id"], "send_reply", reply)

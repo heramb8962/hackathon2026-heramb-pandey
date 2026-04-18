@@ -1,46 +1,41 @@
 from agent.planner import plan
-from agent.executor import execute
-from agent.memory import store, get_similar
+from agent.executor_async import execute_async
+from utils.metrics import start, end
+
+def get_priority(msg):
+    msg = msg.lower()
+    if "urgent" in msg:
+        return "HIGH"
+    if "refund" in msg:
+        return "MEDIUM"
+    return "LOW"
 
 def decide(results):
     if "error" in results:
-        return "escalate", 0.3
-
-    if "eligibility" in results:
-        if not results["eligibility"]["eligible"]:
-            return "escalate", 0.5
-
-    confidence = 0.9 if "refund" in results else 0.8
-    return "resolved", confidence
+        return "escalate", 0.2
+    return "resolved", 0.9
 
 
-def process_ticket(ticket):
-    print(f"\n[AGENT] Processing ticket {ticket['ticket_id']}")
+# ✅ NOW ASYNC
+async def process_ticket(ticket):
+    print(f"\n[AGENT] Processing {ticket['ticket_id']}")
 
-    # 🔹 Memory check
-    past = get_similar(ticket["message"])
-    if past:
-        print("[MEMORY] Found similar case, reusing result")
-        return past
+    priority = get_priority(ticket["message"])
 
-    # 🔹 Planning
+    t0 = start()
+
     steps = plan(ticket)
 
-    # 🔹 Execution
-    results = execute(steps, ticket)
+    # ✅ FIX: directly await
+    results = await execute_async(steps, ticket)
 
-    # 🔹 Decision
+    end(t0, success=("error" not in results))
+
     decision, confidence = decide(results)
 
-    final = {
+    return {
         "results": results,
         "decision": decision,
-        "confidence": confidence
+        "confidence": confidence,
+        "priority": priority
     }
-
-    # 🔹 Store memory
-    store(ticket, final)
-
-    print(f"[AGENT] Decision: {decision} (confidence: {confidence})")
-
-    return final

@@ -8,4 +8,4 @@ def retry(func, retries=3, delay=1):
             print(f"[RETRY] Attempt {attempt+1} failed: {e}")
             time.sleep(delay)
 
-    raise Exception("All retries failed")
+    return {"error": "All retries failed"}
