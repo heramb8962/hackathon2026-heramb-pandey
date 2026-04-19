@@ -1,12 +1,10 @@
 import asyncio
 from tools.order import get_order
 from tools.refund import check_refund_eligibility, issue_refund
-
+from services.kb import search_kb  # make sure this exists
 
 async def execute_async(steps, ticket):
-    results = {
-        "steps_executed": []
-    }
+    results = {"steps_executed": []}
 
     for step in steps:
         try:
@@ -19,76 +17,46 @@ async def execute_async(steps, ticket):
                 if not order_id:
                     raise Exception("Missing order_id")
 
-                # 🔁 retry logic
-                for attempt in range(2):
-                    try:
-                        results["order"] = get_order(order_id)
-                        break
-                    except Exception as e:
-                        print(f"[RETRY] get_order attempt {attempt+1}: {e}")
-                        await asyncio.sleep(0.2)
-                else:
-                    raise Exception("Order service failed after retries")
+                try:
+                    results["order"] = get_order(order_id)
+                except Exception as e:
+                    if "Invalid order ID" in str(e):
+                        raise Exception("Invalid order ID provided")
+                    raise
 
             # ---------------- CHECK REFUND ----------------
             elif step == "check_refund":
                 if "order" not in results:
-                    raise Exception("Order data missing before refund check")
+                    raise Exception("Order missing")
 
-                for attempt in range(2):
-                    try:
-                        results["eligibility"] = check_refund_eligibility(
-                            results["order"]
-                        )
-                        break
-                    except Exception as e:
-                        print(f"[RETRY] check_refund attempt {attempt+1}: {e}")
-                        await asyncio.sleep(0.2)
-                else:
-                    raise Exception("Refund service failed after retries")
+                results["eligibility"] = check_refund_eligibility(
+                    results["order"]
+                )
 
             # ---------------- ISSUE REFUND ----------------
             elif step == "issue_refund":
-                if "eligibility" not in results:
-                    raise Exception("Eligibility not checked")
-
-                if results["eligibility"].get("eligible"):
-                    for attempt in range(2):
-                        try:
-                            results["refund"] = issue_refund(
-                                ticket["order_id"],
-                                results["order"]["amount"]
-                            )
-                            break
-                        except Exception as e:
-                            print(f"[RETRY] issue_refund attempt {attempt+1}: {e}")
-                            await asyncio.sleep(0.2)
-                    else:
-                        raise Exception("Refund processing failed after retries")
+                if results.get("eligibility", {}).get("eligible"):
+                    results["refund"] = issue_refund(
+                        ticket["order_id"],
+                        results["order"]["amount"]
+                    )
                 else:
-                    results["refund"] = {
-                        "status": "failed",
-                        "reason": "Not eligible"
-                    }
+                    print("[INFO] Not eligible → skipping refund")
 
             # ---------------- SEND REPLY ----------------
             elif step == "send_reply":
-                # ❌ DO NOT generate reply here
-                # Just mark step as done
                 pass
 
-            # ---------------- TRACK STEP ----------------
-            results["steps_executed"].append(step)
+            elif step == "search_kb":
+                results["kb"] = search_kb(ticket["message"])
 
+            results["steps_executed"].append(step)
             await asyncio.sleep(0.1)
 
         except Exception as e:
-            print(f"[EXECUTOR ERROR] Step '{step}' failed: {e}")
-
+            print(f"[ERROR] {e}")
             results["error"] = str(e)
             results["failed_step"] = step
-            results["steps_executed"].append(step)
-
             break
 
     return results

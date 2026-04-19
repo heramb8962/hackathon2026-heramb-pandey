@@ -1,17 +1,17 @@
 from agent.llm import llm_plan
 import ast
 
-def fix_plan(steps):
-    """
-    Ensure logical correctness of plan
-    """
 
-    # If refund steps exist → ensure get_order first
-    if "check_refund" in steps or "issue_refund" in steps:
-        if "get_order" not in steps:
-            steps.insert(0, "get_order")
+def fix_plan(steps, message):
+    msg = message.lower()
 
-    # Ensure order: get_order → check_refund → issue_refund
+    # Remove refund steps if not needed
+    if not any(word in msg for word in ["refund", "damaged", "broken", "wrong", "defective"]):
+        steps = [s for s in steps if s not in ["check_refund", "issue_refund"]]
+
+    if ("check_refund" in steps or "issue_refund" in steps) and "get_order" not in steps:
+        steps.insert(0, "get_order")
+
     ordered = []
 
     if "get_order" in steps:
@@ -34,53 +34,25 @@ def fix_plan(steps):
 
 def plan(ticket):
     message = ticket["message"]
-
-    print("[PLANNER] Trying LLM planner...")
-
-    raw = llm_plan(message)
-
-    if raw:
-        try:
-            start = raw.find("[")
-            end = raw.rfind("]") + 1
-
-            if start != -1 and end != -1:
-                cleaned = raw[start:end]
-
-                steps = ast.literal_eval(cleaned)
-
-                valid_steps = {
-                    "get_order",
-                    "check_refund",
-                    "issue_refund",
-                    "search_kb",
-                    "send_reply"
-                }
-
-                steps = [s for s in steps if s in valid_steps]
-
-                # 🔥 FIX PLAN HERE
-                steps = fix_plan(steps)
-
-                print(f"[PLANNER] LLM Plan (fixed): {steps}")
-                return steps
-
-        except Exception as e:
-            print(f"[PLANNER] LLM parsing failed: {e}")
-
-    # 🔁 FALLBACK
-    print("[PLANNER] Using fallback planner")
-
     msg = message.lower()
-    steps = ["get_order"]
 
-    if any(word in msg for word in ["refund", "damaged", "broken", "wrong"]):
-        steps += ["check_refund", "issue_refund"]
+    print("[PLANNER] Using improved planner")
 
-    elif any(word in msg for word in ["how", "can i", "help"]):
-        steps = ["search_kb"]
+    # ✅ PRIORITY 1: KNOWLEDGE BASE (VERY IMPORTANT)
+    if any(w in msg for w in ["policy", "how", "cancel", "exchange", "delivery", "help"]):
+        steps = ["search_kb", "send_reply"]
 
-    steps.append("send_reply")
+    # ✅ PRIORITY 2: REFUND / RETURN ACTION
+    elif any(w in msg for w in ["refund", "return", "damaged", "broken", "wrong", "defective"]):
+        steps = ["get_order", "check_refund", "issue_refund", "send_reply"]
+
+    # ✅ PRIORITY 3: ORDER TRACKING
+    elif any(w in msg for w in ["where", "track", "status", "arrived", "package"]):
+        steps = ["get_order", "send_reply"]
+
+    # ✅ DEFAULT
+    else:
+        steps = ["get_order", "send_reply"]
 
     print(f"[PLANNER] Final Plan: {steps}")
     return steps

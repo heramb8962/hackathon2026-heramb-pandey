@@ -71,7 +71,7 @@ Simulated real-world services:
 
 ### 🤖 Hybrid AI Planning
 
-* LLM-based planning (Gemini / OpenRouter optional)
+* LLM-based planning using **OpenRouter API (optional)**
 * Rule-based fallback (zero-cost mode)
 * Ensures reliability + flexibility
 
@@ -117,6 +117,23 @@ Agent explains its own behavior:
 * Step-by-step execution visualization
 * AI “thinking” simulation
 * Typing effect responses
+
+---
+
+## 🔄 Processing Modes
+
+AutoResolve AI supports **both real-world usage scenarios**:
+
+### 🧾 Single Ticket Processing
+
+* Enter a single query manually
+* Ideal for debugging and live demos
+
+### 📂 Batch Processing
+
+* Upload JSON file with multiple tickets
+* Processes all tickets sequentially with analytics
+* Demonstrates scalability
 
 ---
 
@@ -169,6 +186,9 @@ tools/
   ├── refund.py
   ├── product.py
 
+services/
+  ├── kb.py
+
 utils/
   ├── retry.py
   ├── logger.py
@@ -200,7 +220,7 @@ cd hackathon2026-heramb-pandey
 
 ---
 
-### 2️⃣ Install
+### 2️⃣ Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -208,23 +228,27 @@ pip install -r requirements.txt
 
 ---
 
-### 3️⃣ (Optional) Add API Key
+### 3️⃣ (Optional) Add OpenRouter API Key
+
+Create a `.env` file:
 
 ```
-GEMINI_API_KEY=your_key
+OPENROUTER_API_KEY=your_api_key_here
 ```
 
-> System works even without API (fallback enabled)
+> ⚠️ If not provided, system automatically falls back to rule-based planning
 
 ---
 
-## ▶️ Run
+## ▶️ Run the Project
 
-### 🖥 CLI
+### 🖥 CLI Mode
 
 ```bash
 python main.py
 ```
+
+---
 
 ### 🌐 Streamlit UI
 
@@ -232,7 +256,9 @@ python main.py
 streamlit run app.py
 ```
 
-### ⚡ FastAPI
+---
+
+### ⚡ FastAPI Server
 
 ```bash
 uvicorn api:app --reload
@@ -240,7 +266,7 @@ uvicorn api:app --reload
 
 ---
 
-## 🧪 Sample Flow
+## 🧪 Sample Execution
 
 ```
 User: "My product is damaged, I want refund"
@@ -264,7 +290,7 @@ Decision: resolved (confidence: 0.95)
 | Tool orchestration   | ✅      |
 | Async execution      | ✅      |
 | Failure handling     | ✅      |
-| Memory               | ✅      |
+| Memory system        | ✅      |
 | Explainability       | ✅      |
 | UI / UX              | ✅      |
 | Production readiness | ✅      |
@@ -275,8 +301,8 @@ Decision: resolved (confidence: 0.95)
 
 * Real API integrations
 * Vector database (RAG)
-* RL-based improvement
-* Monitoring dashboard
+* Reinforcement learning loop
+* Monitoring dashboard (Grafana)
 * Multi-agent collaboration
 
 ---

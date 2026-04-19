@@ -1,62 +1,27 @@
+
 [
-  {
-    "ticket_id": 1,
-    "message": "I want a refund, the product was damaged",
-    "order_id": "ORD123",
-    "email": "user1@example.com"
-  },
-  {
-    "ticket_id": 2,
-    "message": "Where is my order?",
-    "order_id": "ORD124",
-    "email": "user2@example.com"
-  },
-  {
-    "ticket_id": 3,
-    "message": "I received a wrong item, I need replacement",
-    "order_id": "ORD125",
-    "email": "user3@example.com"
-  },
-  {
-    "ticket_id": 4,
-    "message": "My product arrived broken, please refund",
-    "order_id": "ORD123",
-    "email": "user4@example.com"
-  },
-  {
-    "ticket_id": 5,
-    "message": "Track my order status",
-    "order_id": "ORD124",
-    "email": "user5@example.com"
-  },
-  {
-    "ticket_id": 6,
-    "message": "I want refund for damaged item",
-    "order_id": "ORD125",
-    "email": "user6@example.com"
-  },
-  {
-    "ticket_id": 7,
-    "message": "I have not received my package yet",
-    "order_id": "ORD999",
-    "email": "user7@example.com"
-  },
-  {
-    "ticket_id": 8,
-    "message": "Product is defective and broken, need refund urgently",
-    "order_id": "ORD123",
-    "email": "user8@example.com"
-  },
-  {
-    "ticket_id": 9,
-    "message": "Can you tell me my order status?",
-    "order_id": "ORD124",
-    "email": "user9@example.com"
-  },
-  {
-    "ticket_id": 10,
-    "message": "I got wrong product and want refund",
-    "order_id": "ORD125",
-    "email": "user10@example.com"
-  }
+  {"ticket_id": 1, "message": "My product is damaged, I want a refund", "order_id": "ORD123"},
+  {"ticket_id": 2, "message": "Where is my order?", "order_id": "ORD124"},
+  {"ticket_id": 3, "message": "I received a broken item, refund please", "order_id": "ORD125"},
+  {"ticket_id": 4, "message": "Track my order status", "order_id": "ORD124"},
+  {"ticket_id": 5, "message": "I want to return my item", "order_id": "ORD125"},
+  
+  {"ticket_id": 6, "message": "Refund for wrong product received", "order_id": "ORD123"},
+  {"ticket_id": 7, "message": "Where is my package?", "order_id": "ORD124"},
+  {"ticket_id": 8, "message": "My order hasn't arrived yet", "order_id": "ORD124"},
+  {"ticket_id": 9, "message": "Product was defective, need refund", "order_id": "ORD125"},
+  {"ticket_id": 10, "message": "Order delivered but item damaged", "order_id": "ORD123"},
+
+  {"ticket_id": 11, "message": "How can I cancel my order?", "order_id": "ORD124"},
+  {"ticket_id": 12, "message": "What is your return policy?", "order_id": "ORD123"},
+  {"ticket_id": 13, "message": "Can I exchange my product?", "order_id": "ORD125"},
+  {"ticket_id": 14, "message": "Help me with refund process", "order_id": "ORD123"},
+  {"ticket_id": 15, "message": "How long does delivery take?", "order_id": "ORD124"},
+
+  {"ticket_id": 16, "message": "Refund for this order asap urgent", "order_id": "ORD123"},
+  {"ticket_id": 17, "message": "URGENT: my item is broken", "order_id": "ORD125"},
+  {"ticket_id": 18, "message": "asdf", "order_id": "ORD123"},
+  {"ticket_id": 19, "message": "Refund for invalid order", "order_id": "ORD999"},
+  {"ticket_id": 20, "message": "Where is my order?", "order_id": "ORD999"}
 ]
+

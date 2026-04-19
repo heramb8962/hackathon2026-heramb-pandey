@@ -1,56 +1,45 @@
 def generate_reply(results, ticket):
     message = ticket.get("message", "").lower()
 
-    # 🚨 ERROR CASE (highest priority)
+    if "error" in results and "Invalid order ID" in results["error"]:
+        return "⚠️ The order ID you provided is invalid. Please check and try again."
+    
+    if len(message.strip()) < 5:
+        return "⚠️ Please provide more details so we can assist you better."
+
+    # ERROR
     if "error" in results:
-        return (
-            "⚠️ We couldn't process your request due to a temporary issue. "
-            "Our support team has been notified."
-        )
+        return "⚠️ We couldn't process your request. It has been forwarded to a human agent."
 
-    # 💰 REFUND SUCCESS
-    if "refund" in results and results["refund"].get("status") == "success":
-        amount = results["refund"]["amount"]
-        return f"✅ Your refund of ₹{amount} has been successfully processed."
+    # 📚 KB HAS HIGHER PRIORITY
+    if "kb" in results:
+        return f"ℹ️ {results['kb']['answer']}"
+    
+    # REFUND
+    if "refund" in results and any(w in message for w in ["refund", "damaged", "broken", "wrong", "defective"]):
+        refund = results["refund"]
+        if refund.get("status") == "success":
+            return f"✅ Your refund of ₹{refund['amount']} has been successfully processed."
 
-    # ❌ REFUND NOT ELIGIBLE
-    if "eligibility" in results:
-        if not results["eligibility"].get("eligible", True):
-            return (
-                "⚠️ Your request is not eligible for a refund. "
-                "Our support team can assist you further."
-            )
+    # NOT ELIGIBLE
+    if "eligibility" in results and not results["eligibility"].get("eligible", True):
+        return "⚠️ Your request is not eligible for a refund."
 
-    # 📚 KNOWLEDGE BASE
-    if "kb" in results and results["kb"].get("answer"):
+    # KB
+    if "kb" in results:
         return f"ℹ️ {results['kb']['answer']}"
 
-    # 📦 ORDER STATUS (AFTER refund checks!)
+    # ORDER
     if "order" in results:
         status = results["order"]["status"]
 
         if status == "shipped":
             return "📦 Your order has been shipped and is on the way."
 
-        elif status == "delivered":
-            # differentiate intent
-            if "refund" in message or "damaged" in message:
-                return "📦 Your order was delivered. Let me help you with your refund request."
+        if status == "delivered":
+            if any(w in message for w in ["refund", "return", "damaged", "broken"]):
+                return "📦 Your order was delivered. We are checking your return/refund request."
             return "📦 Your order has been delivered successfully."
 
-        else:
-            return f"📦 Your order status is '{status}'."
-
-    # 🧠 INTENT-BASED FALLBACK
-    if "refund" in message:
-        return "⚠️ We are reviewing your refund request."
-
-    if "order" in message:
-        return "📦 We are checking your order details."
-
-    confidence = results.get("confidence", 0)
-
-    if confidence < 0.5:
-        return "⚠️ I'm not fully confident. Escalating to human agent."
-    
+    # FALLBACK
     return "✅ Your request has been processed successfully."

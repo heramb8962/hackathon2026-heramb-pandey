@@ -5,20 +5,22 @@ from utils.metrics import start, end
 from agent.response_generator import generate_reply
 
 
-# 🔺 PRIORITY DETECTION
+import re
+
+def extract_order_id(message):
+    match = re.search(r"ORD\d+", message.upper())
+    return match.group(0) if match else None
+
+
 def get_priority(msg):
     msg = msg.lower()
-
     if any(word in msg for word in ["urgent", "asap", "immediately"]):
         return "HIGH"
-
     if any(word in msg for word in ["refund", "damaged", "broken", "wrong"]):
         return "MEDIUM"
-
     return "LOW"
 
 
-# 🧠 DECISION ENGINE
 def decide(results):
     if "error" in results:
         return "escalate", 0.2
@@ -33,72 +35,81 @@ def decide(results):
     return "resolved", 0.85
 
 
-# 🧠 SELF-REFLECTION
 def self_reflect(results):
     if "error" in results:
         return "Agent failed due to tool/service error and escalated."
-
     if "refund" in results:
         return "Agent successfully processed refund after validating eligibility."
-
     if "order" in results:
         return "Agent fetched order details and responded successfully."
-
     return "Agent handled the query successfully."
 
 
-# 🚨 ANOMALY DETECTION
 def detect_anomaly(ticket):
-    msg = ticket.get("message", "").lower()
-    return len(msg) < 5 or "asdf" in msg
+    print("[ANOMALY] Suspicious input detected")
+
+    return {
+        "results": {
+            "reply": "⚠️ We couldn't understand your request. Please provide more details."
+        },
+        "decision": "escalate",
+        "confidence": 0.2,
+        "priority": "LOW",
+        "reflection": "Agent detected anomalous or unclear input."
+    }
 
 
-# ✅ MAIN ASYNC FUNCTION
 async def process_ticket(ticket):
+    if not ticket.get("order_id"):
+        extracted = extract_order_id(message)
+        if extracted:
+            ticket["order_id"] = extracted
+            
     print(f"\n[AGENT] Processing {ticket.get('ticket_id', 'N/A')}")
 
-    message = ticket.get("message", "")
+    message = ticket.get("message", "").lower()
 
-    # 🔺 PRIORITY
+    # 🔺 priority
     priority = get_priority(message)
     print(f"[PRIORITY] {priority}")
 
-    # 🚨 ANOMALY CHECK
+    # 🚨 anomaly
     if detect_anomaly(ticket):
         print("[ANOMALY] Suspicious input detected")
 
-    # 🧠 MEMORY CHECK (STRICT MATCH)
+    # 🧠 MEMORY (STRICT MATCH ONLY)
     past = get_similar(message)
     if past:
         print("[MEMORY] Reusing past solution")
         return past
 
-    # ⏱️ START METRICS
+    # ⏱️ metrics start
     t0 = start()
 
-    # 🧠 PLANNING
+    # 🧠 planning
     steps = plan(ticket)
 
-    # ⚙️ EXECUTION
+    # ⚙️ execution
     results = await execute_async(steps, ticket)
 
-    # ⏱️ END METRICS
+    print("DEBUG RESULTS:", results)  # 🔥 keep for verification
+
+    # ⏱️ metrics end
     end(t0, success=("error" not in results))
 
-    # 🧠 DECISION
+    # 🧠 decision
     decision, confidence = decide(results)
 
-    # 🧠 GENERATE SMART REPLY (🔥 CRITICAL FIX)
+    # 🧠 reply (ALWAYS AFTER EXECUTION)
     results["reply"] = generate_reply(results, ticket)
 
-    # 🚨 OVERRIDE REPLY IF ESCALATED
+    # 🚨 escalation override
     if decision == "escalate":
         results["reply"] = (
             "⚠️ We couldn't fully process your request. "
             "It has been forwarded to a human agent."
         )
 
-    # 🧠 REFLECTION
     reflection = self_reflect(results)
 
     final_output = {
@@ -109,7 +120,6 @@ async def process_ticket(ticket):
         "reflection": reflection
     }
 
-    # 💾 STORE IN MEMORY
     store(ticket, final_output)
 
     print(f"[AGENT] Decision: {decision} (confidence: {confidence})")
