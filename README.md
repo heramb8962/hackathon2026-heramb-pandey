@@ -12,20 +12,20 @@ E-commerce platforms handle thousands of repetitive support queries daily:
 * Order tracking
 * Damaged products
 
-Most of these are **rule-based and automatable**, yet still handled manually.
+Most of these are **predictable and automatable**, yet still handled manually—leading to delays, inconsistency, and high operational cost.
 
 ---
 
 ## 💡 Solution
 
-AutoResolve AI is an **autonomous support agent** that:
+AutoResolve AI is an **autonomous AI agent** that:
 
 * Understands user intent
-* Plans actions dynamically
+* Plans multi-step actions
 * Executes backend tools
-* Resolves issues end-to-end
+* Resolves queries end-to-end
 
-> ⚡ This is not a chatbot — it is an **action-oriented AI agent**
+> ⚡ Not just responding — **taking actions automatically**
 
 ---
 
@@ -33,9 +33,9 @@ AutoResolve AI is an **autonomous support agent** that:
 
 ### 🔁 Multi-Step Reasoning (Agentic Planning)
 
-The agent converts user queries into structured workflows:
+The agent converts queries into structured workflows:
 
-```
+```id="c5xwqk"
 get_order → check_refund → issue_refund → send_reply
 ```
 
@@ -56,8 +56,8 @@ Simulated real-world services:
 ### ⚡ Async Execution Engine
 
 * Built using `asyncio`
-* Handles multiple tickets efficiently
-* Scalable and production-aligned
+* Handles multiple tickets concurrently
+* Scalable and production-ready
 
 ---
 
@@ -65,13 +65,13 @@ Simulated real-world services:
 
 * Automatic retries on failures
 * Graceful degradation
-* No system crashes
+* Prevents system crashes
 
 ---
 
 ### 🤖 Hybrid AI Planning
 
-* LLM-based planning using **OpenRouter API (optional)**
+* LLM-based planning via **OpenRouter API (optional)**
 * Rule-based fallback (zero-cost mode)
 * Ensures reliability + flexibility
 
@@ -80,16 +80,32 @@ Simulated real-world services:
 ### 🧠 Intelligent Response Generation
 
 * Context-aware replies
-* Dynamic based on execution results
-* Handles edge cases gracefully
+* Handles refund, tracking, KB, and edge cases
+* Prevents incorrect responses
 
 ---
 
 ### 🧠 Memory System
 
-* Stores previous resolutions
-* Reuses past solutions for efficiency
-* Simulates real-world agent learning
+* Stores past resolutions
+* Reuses similar solutions
+* Simulates real-world learning
+
+---
+
+### 🚨 Anomaly Detection
+
+* Detects unclear or invalid inputs
+* Prevents incorrect execution
+* Escalates when necessary
+
+---
+
+### 📦 Order Validation System
+
+* Validates order IDs
+* Handles invalid/missing orders gracefully
+* Prevents incorrect operations
 
 ---
 
@@ -104,11 +120,25 @@ Each ticket produces:
 
 ### 🧠 Self-Reflection (Explainability)
 
-Agent explains its own behavior:
+Example:
 
-```
+```id="4d8n2t"
 "Agent successfully processed refund after validating eligibility."
 ```
+
+---
+
+### 📊 Audit Logging (VERY IMPORTANT)
+
+* Logs every ticket execution
+* Stores:
+
+  * steps executed
+  * tool calls
+  * decisions
+  * outputs
+* Saved in: `audit_log.json`
+* Covers all processed tickets
 
 ---
 
@@ -116,32 +146,30 @@ Agent explains its own behavior:
 
 * Step-by-step execution visualization
 * AI “thinking” simulation
-* Typing effect responses
+* Typing-style responses
 
 ---
 
 ## 🔄 Processing Modes
 
-AutoResolve AI supports **both real-world usage scenarios**:
-
 ### 🧾 Single Ticket Processing
 
-* Enter a single query manually
-* Ideal for debugging and live demos
+* Real-time interaction
+* Ideal for live demos
 
 ### 📂 Batch Processing
 
-* Upload JSON file with multiple tickets
-* Processes all tickets sequentially with analytics
+* Process multiple tickets
+* Generates analytics
 * Demonstrates scalability
 
 ---
 
 ## 🏗️ Architecture
 
-Refer: `architecture.md`
+Refer: `architecture.png`
 
-```
+```id="0m9xxt"
 User Input
     ↓
 Planner (LLM + Rule-based)
@@ -167,44 +195,30 @@ Handled scenarios:
 * Invalid order IDs
 * Refund rejection
 * LLM failure
-* Service outages
+* Tool/service failure
 
 ---
 
 ## 📂 Project Structure
 
-```
+```id="0pl7l8"
 agent/
-  ├── planner.py
-  ├── executor_async.py
-  ├── memory.py
-  ├── agent.py
-  ├── response_generator.py
-
 tools/
-  ├── order.py
-  ├── refund.py
-  ├── product.py
-
 services/
-  ├── kb.py
-
 utils/
-  ├── retry.py
-  ├── logger.py
-  ├── metrics.py
-
 data/
-  ├── tickets.json
 
-app.py        → Streamlit UI
-main.py       → CLI runner
-api.py        → FastAPI server
+demo/
+  └── demo.mp4
 
-README.md
-architecture.md
+architecture.png
 failure_modes.md
 audit_log.json
+README.md
+
+app.py
+main.py
+api.py
 ```
 
 ---
@@ -213,7 +227,7 @@ audit_log.json
 
 ### 1️⃣ Clone
 
-```bash
+```bash id="qk8i1y"
 git clone https://github.com/heramb8962/hackathon2026-heramb-pandey
 cd hackathon2026-heramb-pandey
 ```
@@ -222,62 +236,69 @@ cd hackathon2026-heramb-pandey
 
 ### 2️⃣ Install Dependencies
 
-```bash
+```bash id="3q9r8t"
 pip install -r requirements.txt
 ```
 
 ---
 
-### 3️⃣ (Optional) Add OpenRouter API Key
+### 3️⃣ (Optional) Add API Key
 
-Create a `.env` file:
-
-```
+```id="5wv0fa"
 OPENROUTER_API_KEY=your_api_key_here
 ```
 
-> ⚠️ If not provided, system automatically falls back to rule-based planning
+> ⚠️ System works even without API (fallback enabled)
 
 ---
 
-## ▶️ Run the Project
+## ▶️ Run
 
-### 🖥 CLI Mode
+### CLI
 
-```bash
+```bash id="3sl3xn"
 python main.py
 ```
 
 ---
 
-### 🌐 Streamlit UI
+### Streamlit UI
 
-```bash
+```bash id="ffk6mp"
 streamlit run app.py
 ```
 
 ---
 
-### ⚡ FastAPI Server
+### FastAPI
 
-```bash
+```bash id="hz9k7o"
 uvicorn api:app --reload
+```
+
+---
+
+## 🎬 Demo Video
+
+Watch here:
+
+```id="4z2r1b"
+demo/demo.mp4
 ```
 
 ---
 
 ## 🧪 Sample Execution
 
-```
-User: "My product is damaged, I want refund"
+```id="h3d7sn"
+Input: "My product is damaged"
 
 → Plan generated  
 → Order fetched  
 → Refund validated  
 → Refund processed  
-→ Response generated  
 
-Decision: resolved (confidence: 0.95)
+Output: resolved (confidence: 0.95)
 ```
 
 ---
@@ -291,6 +312,7 @@ Decision: resolved (confidence: 0.95)
 | Async execution      | ✅      |
 | Failure handling     | ✅      |
 | Memory system        | ✅      |
+| Audit logging        | ✅      |
 | Explainability       | ✅      |
 | UI / UX              | ✅      |
 | Production readiness | ✅      |
@@ -300,10 +322,10 @@ Decision: resolved (confidence: 0.95)
 ## 🎯 Future Scope
 
 * Real API integrations
-* Vector database (RAG)
+* Vector DB (RAG)
 * Reinforcement learning loop
-* Monitoring dashboard (Grafana)
-* Multi-agent collaboration
+* Monitoring dashboards
+* Multi-agent systems
 
 ---
 
@@ -317,4 +339,4 @@ B.Tech CSE | AI Systems Enthusiast
 ## 🏆 Final Note
 
 > This is not just a chatbot.
-> This is an **autonomous AI agent capable of real-world task execution**.
+> This is a **real-world autonomous AI agent capable of executing tasks end-to-end**.
