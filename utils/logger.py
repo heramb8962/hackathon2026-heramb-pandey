@@ -1,21 +1,24 @@
 import json
+import os
 
-LOG_FILE = "audit_log.json"
+AUDIT_FILE = "audit_log.json"
 
-def log(ticket_id, step, data):
-    entry = {
-        "ticket_id": ticket_id,
-        "step": step,
-        "data": data
-    }
+def log_audit(entry):
+    data = []
 
-    try:
-        with open(LOG_FILE, "r") as f:
-            logs = json.load(f)
-    except:
-        logs = []
+    # ✅ If file exists and is valid → load
+    if os.path.exists(AUDIT_FILE):
+        try:
+            with open(AUDIT_FILE, "r") as f:
+                content = f.read().strip()
+                if content:
+                    data = json.loads(content)
+        except:
+            data = []  # corrupted file → reset
 
-    logs.append(entry)
+    # ✅ append new entry
+    data.append(entry)
 
-    with open(LOG_FILE, "w") as f:
-        json.dump(logs, f, indent=2)
+    # ✅ write safely
+    with open(AUDIT_FILE, "w") as f:
+        json.dump(data, f, indent=2)

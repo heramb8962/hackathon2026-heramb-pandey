@@ -3,7 +3,7 @@ from agent.executor_async import execute_async
 from agent.memory import store, get_similar
 from utils.metrics import start, end
 from agent.response_generator import generate_reply
-
+from utils.logger import log_audit
 
 import re
 
@@ -64,7 +64,7 @@ async def process_ticket(ticket):
         extracted = extract_order_id(message)
         if extracted:
             ticket["order_id"] = extracted
-            
+
     print(f"\n[AGENT] Processing {ticket.get('ticket_id', 'N/A')}")
 
     message = ticket.get("message", "").lower()
@@ -123,5 +123,15 @@ async def process_ticket(ticket):
     store(ticket, final_output)
 
     print(f"[AGENT] Decision: {decision} (confidence: {confidence})")
+
+    log_audit({
+    "ticket_id": ticket.get("ticket_id"),
+    "message": ticket.get("message"),
+    "steps": results.get("steps_executed", []),
+    "decision": decision,
+    "confidence": confidence,
+    "priority": priority,
+    "output": results
+    })
 
     return final_output
