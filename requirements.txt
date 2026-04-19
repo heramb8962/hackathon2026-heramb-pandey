@@ -3,3 +3,5 @@ uvicorn
 streamlit
 pydantic
 pytest
+requests
+python-dotenv

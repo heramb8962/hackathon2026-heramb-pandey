@@ -1,34 +1,94 @@
-from utils.async_retry import async_retry
-from tools.async_wrappers import call_tool
+import asyncio
+from tools.order import get_order
+from tools.refund import check_refund_eligibility, issue_refund
 
-async def execute_async(plan, ticket):
-    results = {"steps_executed": []}
 
-    for step in plan:
-        results["steps_executed"].append(step)
+async def execute_async(steps, ticket):
+    results = {
+        "steps_executed": []
+    }
 
-        if step == "get_order":
-            res = await async_retry(lambda: call_tool("get_order", ticket["order_id"]))
-            if "error" in res:
-                results["error"] = res["error"]
-                break
-            results["order"] = res
+    for step in steps:
+        try:
+            print(f"[EXECUTOR] Running step: {step}")
 
-        elif step == "check_refund":
-            res = await async_retry(lambda: call_tool("check_refund", results["order"]))
-            results["eligibility"] = res
+            # ---------------- GET ORDER ----------------
+            if step == "get_order":
+                order_id = ticket.get("order_id")
 
-        elif step == "issue_refund":
-            res = await async_retry(
-                lambda: call_tool("issue_refund", ticket["order_id"], results["order"]["amount"])
-            )
-            results["refund"] = res
+                if not order_id:
+                    raise Exception("Missing order_id")
 
-        elif step == "search_kb":
-            res = await async_retry(lambda: call_tool("search_kb", ticket["message"]))
-            results["kb"] = res
+                # 🔁 retry logic
+                for attempt in range(2):
+                    try:
+                        results["order"] = get_order(order_id)
+                        break
+                    except Exception as e:
+                        print(f"[RETRY] get_order attempt {attempt+1}: {e}")
+                        await asyncio.sleep(0.2)
+                else:
+                    raise Exception("Order service failed after retries")
 
-        elif step == "send_reply":
-            results["reply"] = "Processed successfully"
+            # ---------------- CHECK REFUND ----------------
+            elif step == "check_refund":
+                if "order" not in results:
+                    raise Exception("Order data missing before refund check")
+
+                for attempt in range(2):
+                    try:
+                        results["eligibility"] = check_refund_eligibility(
+                            results["order"]
+                        )
+                        break
+                    except Exception as e:
+                        print(f"[RETRY] check_refund attempt {attempt+1}: {e}")
+                        await asyncio.sleep(0.2)
+                else:
+                    raise Exception("Refund service failed after retries")
+
+            # ---------------- ISSUE REFUND ----------------
+            elif step == "issue_refund":
+                if "eligibility" not in results:
+                    raise Exception("Eligibility not checked")
+
+                if results["eligibility"].get("eligible"):
+                    for attempt in range(2):
+                        try:
+                            results["refund"] = issue_refund(
+                                ticket["order_id"],
+                                results["order"]["amount"]
+                            )
+                            break
+                        except Exception as e:
+                            print(f"[RETRY] issue_refund attempt {attempt+1}: {e}")
+                            await asyncio.sleep(0.2)
+                    else:
+                        raise Exception("Refund processing failed after retries")
+                else:
+                    results["refund"] = {
+                        "status": "failed",
+                        "reason": "Not eligible"
+                    }
+
+            # ---------------- SEND REPLY ----------------
+            elif step == "send_reply":
+                # ❌ DO NOT generate reply here
+                # Just mark step as done
+                pass
+
+            # ---------------- TRACK STEP ----------------
+            results["steps_executed"].append(step)
+
+            await asyncio.sleep(0.1)
+
+        except Exception as e:
+            print(f"[EXECUTOR ERROR] Step '{step}' failed: {e}")
+
+            results["error"] = str(e)
+            results["failed_step"] = step
+            results["steps_executed"].append(step)
+
+            break
 
     return results

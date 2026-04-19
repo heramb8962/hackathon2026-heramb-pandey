@@ -1,27 +1,39 @@
-# 🤖 Autonomous Support Resolution Agent
+# 🤖 AutoResolve AI — Autonomous Support Resolution Agent
 
-An intelligent, production-ready AI agent designed to autonomously resolve customer support tickets using multi-step reasoning, tool orchestration, and hybrid AI planning.
+An intelligent, production-ready **Agentic AI system** that autonomously resolves customer support tickets using multi-step reasoning, tool orchestration, and real-time execution.
 
 ---
 
 ## 🚀 Problem Statement
 
-Modern e-commerce platforms receive hundreds of repetitive support tickets daily—refunds, order tracking, damaged items, etc. Most of these can be resolved automatically, yet they are still handled manually.
+E-commerce platforms handle thousands of repetitive support queries daily:
 
-This project builds an **Agentic AI system** that:
+* Refund requests
+* Order tracking
+* Damaged products
 
-* Understands customer issues
-* Plans a sequence of actions
-* Executes tools
-* Resolves tickets autonomously
+Most of these are **rule-based and automatable**, yet still handled manually.
 
 ---
 
-## 🧠 Key Features
+## 💡 Solution
 
-### 🔁 Multi-Step Reasoning (Agentic Behavior)
+AutoResolve AI is an **autonomous support agent** that:
 
-The system does NOT respond in one step. It thinks in workflows:
+* Understands user intent
+* Plans actions dynamically
+* Executes backend tools
+* Resolves issues end-to-end
+
+> ⚡ This is not a chatbot — it is an **action-oriented AI agent**
+
+---
+
+## 🧠 Core Capabilities
+
+### 🔁 Multi-Step Reasoning (Agentic Planning)
+
+The agent converts user queries into structured workflows:
 
 ```
 get_order → check_refund → issue_refund → send_reply
@@ -29,98 +41,108 @@ get_order → check_refund → issue_refund → send_reply
 
 ---
 
-### ⚙️ Tool-Based Execution
+### ⚙️ Tool-Orchestrated Execution
 
-Implements real-world service simulation:
+Simulated real-world services:
 
 * `get_order(order_id)` → Fetch order details
-* `check_refund_eligibility(order_id)` → Validate refund
+* `check_refund_eligibility(order)` → Validate refund
 * `issue_refund(order_id, amount)` → Process refund
-* `search_knowledge_base(query)` → Answer FAQs
-* `send_reply(ticket_id, message)` → Respond to user
+* `search_kb(query)` → Answer FAQs
+* `send_reply()` → Generate response
 
 ---
 
-### ⚡ Concurrent Processing
+### ⚡ Async Execution Engine
 
-* Handles multiple tickets simultaneously
 * Built using `asyncio`
-* Improves scalability and performance
+* Handles multiple tickets efficiently
+* Scalable and production-aligned
 
 ---
 
 ### 🔄 Retry & Failure Handling
 
-* Automatic retry on tool failures
-* Handles timeouts gracefully
-* Ensures system does NOT crash
+* Automatic retries on failures
+* Graceful degradation
+* No system crashes
 
 ---
 
-### 🤖 Hybrid AI Architecture
+### 🤖 Hybrid AI Planning
 
-* Uses Gemini (optional) for intelligent planning
-* Falls back to rule-based logic if API fails
-* Ensures **zero-cost + reliability**
+* LLM-based planning (Gemini / OpenRouter optional)
+* Rule-based fallback (zero-cost mode)
+* Ensures reliability + flexibility
 
 ---
 
-### 📊 Decision Engine
+### 🧠 Intelligent Response Generation
+
+* Context-aware replies
+* Dynamic based on execution results
+* Handles edge cases gracefully
+
+---
+
+### 🧠 Memory System
+
+* Stores previous resolutions
+* Reuses past solutions for efficiency
+* Simulates real-world agent learning
+
+---
+
+### 🎯 Decision Engine
 
 Each ticket produces:
 
-* Final decision → `resolved` / `escalated`
-* Confidence score
+* `resolved` / `escalated`
+* confidence score
 
 ---
 
-### 🧾 Audit Logging (Explainability)
+### 🧠 Self-Reflection (Explainability)
 
-* Logs every step of execution
-* Stored in `audit_log.json`
-* Tracks:
-
-  * tool calls
-  * decisions
-  * outputs
-
----
-
-### 🌐 Multiple Interfaces
-
-| Interface | Description         |
-| --------- | ------------------- |
-| CLI       | Run using `main.py` |
-| UI        | Streamlit dashboard |
-| API       | FastAPI backend     |
-
----
-
-## 🏗️ Architecture Overview
-
-Refer to: `architecture.md`
-
-### Flow:
+Agent explains its own behavior:
 
 ```
-Ticket Input
-     ↓
+"Agent successfully processed refund after validating eligibility."
+```
+
+---
+
+### 🎬 Real-Time Streaming UI
+
+* Step-by-step execution visualization
+* AI “thinking” simulation
+* Typing effect responses
+
+---
+
+## 🏗️ Architecture
+
+Refer: `architecture.md`
+
+```
+User Input
+    ↓
 Planner (LLM + Rule-based)
-     ↓
+    ↓
 Executor (Async Engine)
-     ↓
-Tools Layer (Order / Refund / KB)
-     ↓
+    ↓
+Tools Layer
+    ↓
 Decision Engine
-     ↓
-Response / Escalation
+    ↓
+Response Generator
 ```
 
 ---
 
 ## ⚠️ Failure Handling
 
-Refer to: `failure_modes.md`
+Refer: `failure_modes.md`
 
 Handled scenarios:
 
@@ -128,35 +150,48 @@ Handled scenarios:
 * Invalid order IDs
 * Refund rejection
 * LLM failure
-* Async execution errors
+* Service outages
 
 ---
 
 ## 📂 Project Structure
 
 ```
-agent/        → planner, executor, memory, decision logic
-tools/        → simulated APIs (order, refund, product)
-utils/        → retry, logging
-services/     → knowledge base, metrics (optional)
-models/       → schemas (optional)
-data/         → sample tickets
+agent/
+  ├── planner.py
+  ├── executor_async.py
+  ├── memory.py
+  ├── agent.py
+  ├── response_generator.py
 
-main.py       → CLI runner
+tools/
+  ├── order.py
+  ├── refund.py
+  ├── product.py
+
+utils/
+  ├── retry.py
+  ├── logger.py
+  ├── metrics.py
+
+data/
+  ├── tickets.json
+
 app.py        → Streamlit UI
+main.py       → CLI runner
 api.py        → FastAPI server
 
+README.md
 architecture.md
 failure_modes.md
 audit_log.json
-README.md
 ```
 
 ---
 
-## 🛠️ Setup Instructions
+## 🛠️ Setup
 
-### 1️⃣ Clone Repository
+### 1️⃣ Clone
 
 ```bash
 git clone https://github.com/heramb8962/hackathon2026-heramb-pandey
@@ -165,7 +200,7 @@ cd hackathon2026-heramb-pandey
 
 ---
 
-### 2️⃣ Install Dependencies
+### 2️⃣ Install
 
 ```bash
 pip install -r requirements.txt
@@ -173,37 +208,31 @@ pip install -r requirements.txt
 
 ---
 
-### 3️⃣ (Optional) Add Gemini API Key
-
-Create a `.env` file in root:
+### 3️⃣ (Optional) Add API Key
 
 ```
-GEMINI_API_KEY=your_api_key_here
+GEMINI_API_KEY=your_key
 ```
 
-> ⚠️ If not provided, system uses fallback logic
+> System works even without API (fallback enabled)
 
 ---
 
-## ▶️ Run the Project
+## ▶️ Run
 
-### CLI Mode
+### 🖥 CLI
 
 ```bash
 python main.py
 ```
 
----
-
-### Streamlit UI
+### 🌐 Streamlit UI
 
 ```bash
 streamlit run app.py
 ```
 
----
-
-### FastAPI Server
+### ⚡ FastAPI
 
 ```bash
 uvicorn api:app --reload
@@ -211,50 +240,55 @@ uvicorn api:app --reload
 
 ---
 
-## 🧪 Sample Execution
+## 🧪 Sample Flow
 
 ```
-[AGENT] Processing ticket 1
-[PLANNER] Final Plan: ['get_order', 'check_refund', 'issue_refund', 'send_reply']
-[EXECUTOR] Executing plan...
+User: "My product is damaged, I want refund"
 
-Decision: resolved (confidence: 0.9)
+→ Plan generated  
+→ Order fetched  
+→ Refund validated  
+→ Refund processed  
+→ Response generated  
+
+Decision: resolved (confidence: 0.95)
 ```
 
 ---
 
-## 📊 Evaluation Criteria Coverage
+## 📊 Evaluation Coverage
 
-| Requirement                | Status |
-| -------------------------- | ------ |
-| Multi-step agent           | ✅      |
-| Tool chaining              | ✅      |
-| Concurrency                | ✅      |
-| Failure handling           | ✅      |
-| Audit logging              | ✅      |
-| Explainability             | ✅      |
-| Production-ready structure | ✅      |
+| Criteria             | Status |
+| -------------------- | ------ |
+| Multi-step reasoning | ✅      |
+| Tool orchestration   | ✅      |
+| Async execution      | ✅      |
+| Failure handling     | ✅      |
+| Memory               | ✅      |
+| Explainability       | ✅      |
+| UI / UX              | ✅      |
+| Production readiness | ✅      |
 
 ---
 
-## 🎯 Future Improvements
+## 🎯 Future Scope
 
-* Real database integration
-* Advanced LLM reasoning
-* Reinforcement learning loop
-* Monitoring dashboard (Grafana)
-* Real-time API integrations
+* Real API integrations
+* Vector database (RAG)
+* RL-based improvement
+* Monitoring dashboard
+* Multi-agent collaboration
 
 ---
 
 ## 👨‍💻 Author
 
 **Heramb Pandey**
-B.Tech CSE | AI & Systems Enthusiast
+B.Tech CSE | AI Systems Enthusiast
 
 ---
 
 ## 🏆 Final Note
 
 > This is not just a chatbot.
-> This is an autonomous agent designed for real-world deployment.
+> This is an **autonomous AI agent capable of real-world task execution**.

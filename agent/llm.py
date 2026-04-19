@@ -1,43 +1,77 @@
 import os
+import requests
 from dotenv import load_dotenv
-from google import genai
 
 load_dotenv()
 
-api_key = os.getenv("GEMINI_API_KEY")
+def llm_plan(message):
+    api_key = os.getenv("OPENROUTER_API_KEY")
 
-if not api_key:
-    raise ValueError("GEMINI_API_KEY not found")
+    if not api_key:
+        print("[LLM] No OpenRouter key found, using fallback")
+        return None
 
-client = genai.Client(api_key=api_key)
+    try:
+        url = "https://openrouter.ai/api/v1/chat/completions"
 
-def get_plan(message):
-    prompt = f"""
-You are an intelligent AI support agent.
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
 
-Available tools:
+        prompt = f"""
+You are an intelligent customer support AI agent planner.
+
+Your job is to convert user messages into a sequence of actions.
+
+Available actions:
 - get_order
 - check_refund
 - issue_refund
+- search_kb
 - send_reply
 
 Rules:
-- Use multiple steps for complex queries
-- Always validate before action
-- Return ONLY Python list
+1. Always include 'get_order' before refund-related steps
+2. Refund flow must be:
+   get_order → check_refund → issue_refund
+3. Use 'search_kb' for general questions
+4. Always end with 'send_reply'
+5. Return ONLY a Python list
 
-Ticket:
-"{message}"
+Examples:
+
+Message: "I want a refund for damaged product"
+Output: ["get_order", "check_refund", "issue_refund", "send_reply"]
+
+Message: "Where is my order?"
+Output: ["get_order", "send_reply"]
+
+Message: "How can I cancel my order?"
+Output: ["search_kb", "send_reply"]
+
+Now process:
+
+Message: {message}
 """
 
-    try:
-        response = client.models.generate_content(
-            model="gemini-1.5-flash-latest",  # ✅ FIXED MODEL
-            contents=prompt
-        )
+        data = {
+            "model": "openai/gpt-3.5-turbo",  # safe free model
+            "messages": [
+                {"role": "user", "content": prompt}
+            ],
+            "temperature": 0.2
+        }
 
-        return response.text
+        response = requests.post(url, headers=headers, json=data)
+        result = response.json()
+
+        if "choices" not in result:
+            print("[LLM ERROR]", result)
+            return None
+
+        return result["choices"][0]["message"]["content"]
 
     except Exception as e:
         print(f"[LLM ERROR] {e}")
-        return '["get_order", "send_reply"]'
+        return None
